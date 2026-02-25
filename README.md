@@ -30,6 +30,7 @@ pip install -r requirements.txt
 ```
 
 ## Repository Structure
+[<img src="gamm_duffing_hbm_nn.svg" height="300">](gamm_duffing_hbm_nn.svg)
 
 ## License
 GNU General Public License v3.0
