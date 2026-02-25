@@ -4,7 +4,7 @@ This repository accompanies the conference contribution:
 **"Learning Duffing-Type Forces for the Harmonic Balance Method Using Neural Networks"**  
 Presented at GAMM 2026.
 
-**Authors**
+**Authors**  
 Miriam Goldack¹, Johann Groß², Malte Krack², Merten Stender¹  
 ¹Cyber-Physical Systems in Mechanical Engineering, Technische Universität Berlin, Germany  
 ²Institute of Aircraft Propulsion Systems, University of Stuttgart, Germany
@@ -36,6 +36,6 @@ pip install -r requirements.txt
 GNU General Public License v3.0
 
 ## Contact
-Miriam Goldack
-CPS-ME, TU Berlin
+Miriam Goldack  
+CPS-ME, TU Berlin  
 m.goldack@tu-berlin.de
