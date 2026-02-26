@@ -1,26 +1,5 @@
 import numpy as np
 import torch
-from src.fourier_conversion import convert_comexp_to_cossin
-
-
-def NN_jacobian(input, mu, zeta, kappa, gamma, P, H, N, nonlinear_term, NN_id,
-                evaluate_coefficients, Om):
-
-    omega_h = np.arange(-H, H+1) * Om  # Harmonic frequencies
-
-    NN_model = torch.load('models/MLP_Duffing_'+NN_id+'.pt',
-                          weights_only=False)
-    NN_model.eval()
-
-    input_tensor = torch.tensor(input, dtype=torch.float32, requires_grad=True)
-    jac = torch.autograd.functional.jacobian(NN_model, input_tensor)
-    linear_term_ce = -mu * omega_h**2 + 1j * omega_h * zeta + kappa
-    # Conversion of complex-exponential to sine-cosine representation
-    linear_term_cs = convert_comexp_to_cossin(linear_term_ce, H)
-    linear_term = np.diag(linear_term_cs)
-    derivative = linear_term + jac.detach().numpy() * 0.001
-
-    return derivative
 
 
 def NN_jacobian_Duffing_H3(input, mu, zeta, kappa, gamma, P, H, N,

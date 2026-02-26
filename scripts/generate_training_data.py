@@ -3,10 +3,9 @@ from time import strftime
 from src.aft import compute_AFT_solution
 from src.fourier_conversion import (convert_cossin_to_comexp,
                                     convert_comexp_to_cossin)
-import matplotlib.pyplot as plt
 
 
-SAVE_TRAINING_DATA = 1
+SAVE_TRAINING_DATA = 0
 training_points = 10000
 
 H = 3        # Number of harmonics
@@ -117,18 +116,8 @@ if SAVE_TRAINING_DATA:
     filename = f'duffing_training_data_H{H}_N{N}_{current_time}'
     np.savez(f'data/{filename}.npz', q_coeffs=in_all, fnl_coeffs=out_all)
 
-print(np.shape(in_all), np.shape(out_all))
-print(np.shape([row[0] for row in in_all]))
-
-fig, ax = plt.subplots(4, 1, figsize=(5, 6))
-ax[0].hist([row[0] for row in in_all], bins=20, color='#A8DADC')
-ax[1].hist([row[1] for row in in_all], bins=20, color='#457B9D', alpha=0.7)
-ax[2].hist([row[2] for row in in_all], bins=20, color='#1D3557', alpha=0.7)
-ax[3].hist([row[3] for row in in_all], bins=20, color='#1D3557', alpha=0.7)
-ax[3].set_xlabel(r'$c_{1}$')
-ax[0].set_ylabel('Number of samples')
-ax[1].set_ylabel('Number of samples')
-ax[2].set_ylabel('Number of samples')
-plt.title('Training input')
-plt.tight_layout()
-plt.show()
+print('Successfully generated training data:')
+print(f'{np.shape(in_all)[0]} samples for ' +
+      f'{np.shape(in_all)[1]} input features')
+print(f'{np.shape(out_all)[0]} samples for corresponding ' +
+      f'{np.shape(out_all)[1]} output features')
