@@ -29,7 +29,7 @@
 clearvars;
 close all;
 clc;
-addpath('../NLvib/SRC');
+addpath('src');
 %% Parameters of the Duffing oscillator
 mu = 1;
 zeta = 0.05;
@@ -53,7 +53,7 @@ x0 = [0;real(Q);-imag(Q);zeros(2*(H-1),1)];
 ds = .01;                       % Path continuation step size
 Sopt = struct('jac','none');    % No analytical Jacobian provided here
 X = solve_and_continue(x0,...
-    @(X) HB_residual_Duffing_reference(X,mu,zeta,kappa,gamma,P,H,N),...
+    @(X) hb_residual_aft(X,mu,zeta,kappa,gamma,P,H,N),...
     Om_s,Om_e,ds,Sopt);
 
 % Determine excitation frequency and amplitude (magnitude of fundamental
@@ -83,7 +83,7 @@ end
 valid_ana = imag(Om_ana(:,1))==0 & imag(Om_ana(:,2))==0;
 %% Write results to file
 data = [Om; a];
-writematrix(data, 'data/Duffing_reference_results.csv');
+writematrix(data, 'results/Duffing_reference_results.csv');
 %% Illustrate results
 figure; hold on;
 plot(Om,a,'k-');

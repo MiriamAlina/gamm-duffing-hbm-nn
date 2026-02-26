@@ -29,7 +29,7 @@
 clearvars;
 close all;
 clc;
-addpath('../NLvib/SRC');
+addpath('src');
 %% Parameters of the Duffing oscillator
 mu = 1;
 zeta = 0.05;
@@ -53,7 +53,7 @@ x0 = [0;real(Q);-imag(Q);zeros(2*(H-1),1)];
 ds = .01;                       % Path continuation step size
 Sopt    = struct('jac', 'x');
 [X, Solinfo] = solve_and_continue(x0,...
-    @(X) HB_residual_Duffing_modular(X,mu,zeta,kappa,gamma,P,H,N),...
+    @(X) hb_residual_nn(X,mu,zeta,kappa,gamma,P,H,N),...
     Om_s,Om_e,ds,Sopt);
 
 % Determine excitation frequency and amplitude (magnitude of fundamental
@@ -83,12 +83,12 @@ end
 valid_ana = imag(Om_ana(:,1))==0 & imag(Om_ana(:,2))==0;
 %% Write results to file
 data = [Om; a];
-writematrix(data, 'data/Duffing_testing_results.csv');
+writematrix(data, 'results/Duffing_testing_results.csv');
 %% Illustrate results
 figure; hold on;
 plot(Om,a,'k-');
 plot(Om_ana(valid_ana,:),a_ana(valid_ana),'gx');
-set(gca,'xlim',[Om_s Om_e]);
+set(gca,'xlim',[min(Om_s, Om_e) max(Om_s, Om_e)]);
 xlabel('excitation frequency \Omega'); ylabel('response amplitude a');
 legend(['numerical HB, H=' num2str(H)],'analytical HB, H=1',...
     'LOCATION','NW');

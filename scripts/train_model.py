@@ -14,7 +14,7 @@ SAVE = False  # whether to save the trained model
 
 # load training data
 data_load_date = '2026-02-18_14-04-47'
-model_load_date = '-'
+model_load_date = '2026-02-18_13-29-30'
 data = np.load('data/duffing_training_data_H3_N64_'+data_load_date+'.npz')
 q_coeffs = data['q_coeffs']  # input: [c1, s1, c3, s3]
 fnl_coeffs = data['fnl_coeffs']  # output: [c1, s1, c3, s3]

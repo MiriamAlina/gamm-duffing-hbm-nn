@@ -22,8 +22,8 @@ for i, a in enumerate(a_ana):
 valid_ana = (np.isreal(Om_ana[:, 0])) & (np.isreal(Om_ana[:, 1]))
 
 # ---------------------- Load Reference and Test Results ----------------------
-ref = pd.read_csv('./data/Duffing_reference_results.csv', header=None)
-test = pd.read_csv('./data/Duffing_testing_results.csv', header=None)
+ref = pd.read_csv('./results/Duffing_reference_results.csv', header=None)
+test = pd.read_csv('./results/Duffing_testing_results.csv', header=None)
 
 diff = ref - test
 max_diff = diff.abs().max().max()
