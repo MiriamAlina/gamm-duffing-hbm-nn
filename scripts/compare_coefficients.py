@@ -13,47 +13,147 @@ from src.fourier_conversion import (convert_cossin_to_comexp,
 from src.nn_inference import evaluate_Duffing_nn_H3
 
 
-def compare_coefficients(AFT_result, NN_result, description):
-    '''
-    Evaluates the difference of two vectors according to different error
-    metrics.
-    Input: two coefficient vectors in cosine-sine form (real vectors)
-    '''
+def compare_coefficients(y_true, y_pred, normalize=False, eps=1e-14):
+    """
+    Compare two arrays of shape (N, 4) using common regression metrics.
+    
+    Parameters
+    ----------
+    y_true : ndarray (N,4)
+    y_pred : ndarray (N,4)
+    normalize : bool
+        If True, normalize using mean/std of y_true per output.
+    """
+    
+    if normalize:
+        mean = y_true.mean(axis=0, keepdims=True)
+        std = y_true.std(axis=0, keepdims=True)
+        std[std == 0] = 1.0
+        y_true = (y_true - mean) / std
+        y_pred = (y_pred - mean) / std
 
-    r2_result = r2_score(AFT_result, NN_result)
-    mse_result = mean_squared_error(AFT_result, NN_result)
-    mae_result = mean_absolute_error(AFT_result, NN_result)
-    rmse_result = root_mean_squared_error(AFT_result, NN_result)
-    cossim_result = cosine_similarity(AFT_result, NN_result)
+    assert y_true.shape == y_pred.shape
+    N, d = y_true.shape
 
-    print(f"R^2 Score\t\t\t(best:1): {np.round(r2_result, 4)}")
-    print(f"Mean Squared Error\t\t(best 0): {np.round(mse_result, 4)}")
-    print(f"Mean Absolute Error\t\t(best 0): {np.round(mae_result, 4)}")
-    print(f"Root Mean Squared Error\t\t(best 0): {np.round(rmse_result, 4)}")
-    print(f"Cosine Similarity\t\t(best 1): {np.round(cossim_result, 4)}")
+    # ---- Global metrics (averaged over outputs) ----
+    rel_l2_global = np.linalg.norm(y_true - y_pred) / \
+                    (np.linalg.norm(y_true) + eps)  # global relative L2 error (spectral energy error)
+    r2_global = r2_score(y_true, y_pred, multioutput='uniform_average')
+    mse_global = mean_squared_error(y_true, y_pred, multioutput='uniform_average')
+    mae_global = mean_absolute_error(y_true, y_pred, multioutput='uniform_average')
+    rmse_global = np.sqrt(mse_global)
 
-    return
+    # cosine similarity over whole dataset (flattened vectors)
+    cos_global = cosine_similarity(
+        y_true.ravel(),
+        y_pred.ravel()
+    )
+
+    # ---- Per-output metrics ----
+    rel_l2_per_mode = []
+    r2_per = []
+    mse_per = []
+    mae_per = []
+    rmse_per = []
+    cos_per = []
+
+    for i in range(d):
+        err = np.linalg.norm(y_true[:, i] - y_pred[:, i])
+        norm = np.linalg.norm(y_true[:, i]) + eps
+        rel_l2_per_mode.append(err / norm)
+        r2_per.append(r2_score(y_true[:, i], y_pred[:, i]))
+        mse_i = mean_squared_error(y_true[:, i], y_pred[:, i])
+        mae_i = mean_absolute_error(y_true[:, i], y_pred[:, i])
+        rmse_i = np.sqrt(mse_i)
+
+        cos_i = cosine_similarity(
+            y_true[:, i].ravel(),
+            y_pred[:, i].ravel()
+        )
+
+        mse_per.append(mse_i)
+        mae_per.append(mae_i)
+        rmse_per.append(rmse_i)
+        cos_per.append(cos_i)
+
+    rel_l2_balanced = np.mean(rel_l2_per_mode)
+
+    print("========== GLOBAL METRICS ==========")
+    print(f"rel L2 error    : {rel_l2_global:.6e}")
+    print(f"R²              : {r2_global:.6f}")
+    print(f"MSE             : {mse_global:.6e}")
+    print(f"RMSE            : {rmse_global:.6e}")
+    print(f"MAE             : {mae_global:.6e}")
+    print(f"CosSim          : {cos_global:.6f}")
+
+    print("\n====== PER OUTPUT METRICS ======")
+    for i in range(d):
+        print(f"\nOutput {i}:")
+        print(f"Balanced mean relative L2 error : {rel_l2_balanced:.6e}")
+        print(f"  R²     : {r2_per[i]:.6f}")
+        print(f"  MSE    : {mse_per[i]:.6e}")
+        print(f"  RMSE   : {rmse_per[i]:.6e}")
+        print(f"  MAE    : {mae_per[i]:.6e}")
+        print(f"  CosSim : {cos_per[i]:.6f}")
+
+    return {
+        "rel_l2_global": rel_l2_global,
+        "rel_l2_balanced": rel_l2_balanced,
+        "rel_l2_per_mode": rel_l2_per_mode,
+        "cos_global": cos_global,
+        "r2_per_mode": r2_per,
+        "mse_per_mode": mse_per
+    }
 
 
-def compare_test_set(AFT_results, NN_results):
-    mean = AFT_results.mean(axis=0, keepdims=True)
-    std = AFT_results.std(axis=0, keepdims=True)
-    AFT_results_normalized = (AFT_results - mean) / std
-    NN_results_normalized = (NN_results - mean) / std
+def metrics_to_radar_scores(metrics):
+    scores = {}
 
-    r2_per_output = [
-        r2_score(AFT_results_normalized[:, i], NN_results_normalized[:, i])
-        for i in range(AFT_results.shape[1])
-    ]
+    # ----- Errors → 1/(1+error) -----
+    scores["rel_L2"] = 1 / (1 + metrics["rel_l2_global"])
 
-    r2_mean = np.mean(r2_per_output)
+    mse_mean = np.mean(metrics["mse_per_mode"])
+    scores["MSE"] = 1 / (1 + mse_mean)
 
-    print("normalized R^2 Score per output (whole test set): " +
-          f"{np.round(r2_per_output, 4)}" + "}")
-    print("normalized mean R^2 Score (whole test set):" +
-          str(np.round(r2_mean, 4)))
+    # RMSE nicht separat gespeichert → ableiten
+    rmse_mean = np.sqrt(mse_mean)
+    scores["RMSE"] = 1 / (1 + rmse_mean)
 
-    return
+    # MAE nicht gespeichert → optional ergänzen
+    # falls du willst, füge MAE_mean oben in return hinzu
+
+    # ----- R² -----
+    r2_mean = np.mean(metrics["r2_per_mode"])
+    scores["R2"] = max(0.0, r2_mean)
+
+    # ----- Cosine -----
+    scores["CosSim"] = 0.5 * (1 + metrics["cos_global"])
+
+    return scores
+
+
+
+def plot_radar(scores):
+
+    labels = list(scores.keys())
+    values = list(scores.values())
+
+    # schließen des Polygons
+    values += values[:1]
+    angles = np.linspace(0, 2*np.pi, len(labels), endpoint=False).tolist()
+    angles += angles[:1]
+
+    fig, ax = plt.subplots(figsize=(6,6), subplot_kw=dict(polar=True))
+
+    ax.plot(angles, values)
+    ax.fill(angles, values, alpha=0.25)
+
+    ax.set_xticks(angles[:-1])
+    ax.set_xticklabels(labels)
+
+    ax.set_ylim(0,1)
+
+    plt.show()
 
 
 # training data
@@ -91,7 +191,11 @@ for i in range(np.shape(q_rel)[0]):
     fnl_rel_nn.append(fnl_cs_NN)
 
 fnl_rel_aft = np.array(fnl_rel_aft)
+fnl_rel_aft_comparison = fnl_rel_aft[:, [1, 2, 5, 6]]
 fnl_rel_nn = np.array(fnl_rel_nn)
+metrics = compare_coefficients(fnl_rel_aft_comparison, fnl_rel_nn)
+radar_scores = metrics_to_radar_scores(metrics)
+plot_radar(radar_scores)
 
 
 # NN prediction vs. AFT ground-truth over training samples and FRC inputs
