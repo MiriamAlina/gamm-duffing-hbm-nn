@@ -14,20 +14,27 @@ Thin-walled lightweight structures often exhibit geometrically nonlinear behavio
 
 In this work, we propose to replace the AFT with a neural network architecture trained for a specific type of contact nonlinearity, a cubic stiffness, and a fixed number of harmonics. It takes normalized Fourier coefficients of the displacement as input and outputs the corresponding nonlinear force Fourier coefficients without making use of the FT. Proof-of-concept studies on the Duffing oscillator demonstrate that the neural network can accurately learn the mapping and even provide the derivatives of the nonlinear forcing coefficients with respect to the displacement coefficients through automatic differentiation. The resulting Jacobian can then be used directly, leading to a more efficient and better-conditioned (iterative) solution process. Prediction errors are evaluated in terms of the data fit (i.e. matching coefficients computed by the AFT), but also in terms of the resulting system response (i.e. integrating the neural AFT into the classical HBM procedure).
 
-## Requirements
+## Requirements & Installation
 
-The project was developed with:  
-```py
-Python 3.12.11  
-MATLAB R2025a
-```
-To install the required packages:
+The project was developed with:
+
+- Python 3.12.11  
+- MATLAB R2025a  
+
+Install the required Python packages:
 
 ```bash
 pip install -r requirements.txt
 ```
 
-## Repository Structure
+From the top-level repository directory (where `pyproject.toml` is located), install the package in editable mode to make the `src` modules importable from anywhere:
+
+```bash
+pip install -e .
+```
+
+## Workflow Overview
+The diagram below summarizes the overall process, including data generation, neural network training, and evaluation at both the coefficient level and within the physical model integration.  
 [<img src="gamm_duffing_hbm_nn.svg" height="600">](gamm_duffing_hbm_nn.svg)
 
 ## License
