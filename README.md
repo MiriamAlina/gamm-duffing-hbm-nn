@@ -18,10 +18,8 @@ In this work, we propose to replace the AFT with a neural network architecture t
 
 The project was developed with:  
 ```py
-python 3.12
-numpy 2.1
-matplotlib 3.10
-scipy 1.16
+Python 3.12.11  
+MATLAB R2025a
 ```
 To install the required packages:
 
