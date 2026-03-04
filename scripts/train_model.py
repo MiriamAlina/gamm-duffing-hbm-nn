@@ -2,7 +2,6 @@ import numpy as np
 import torch
 import torch.nn as nn
 import torch.optim as optim
-from sklearn.model_selection import train_test_split
 import matplotlib
 import matplotlib.pyplot as plt
 import joblib
@@ -12,19 +11,18 @@ matplotlib.rcParams.update({'font.size': 12})
 MODE = 'inference'  # 'train' or 'inference'
 SAVE = False  # whether to save the trained model
 
-# load training data
-data_load_date = '2026-02-18_14-04-47'
-model_load_date = '2026-02-18_13-29-30'
-data = np.load('data/duffing_training_data_H3_N64_'+data_load_date+'.npz')
-q_coeffs = data['q_coeffs']  # input: [c1, s1, c3, s3]
-fnl_coeffs = data['fnl_coeffs']  # output: [c1, s1, c3, s3]
-# split data into 60% train, 20% valdation and 20% test
-X_tmp, X_test, y_tmp, y_test = train_test_split(
-    q_coeffs, fnl_coeffs, test_size=0.2, random_state=42
-)
-X_train, X_val, y_train, y_val = train_test_split(
-    X_tmp, y_tmp, test_size=0.25, random_state=42
-)
+# load data
+model_id = '2026-02-18_13-29-30'
+data_id = '2026-02-18_14-04-47'
+train_data = np.load('data/duffing_train_data_H3_N64_'+data_id+'.npz')
+X_train = train_data['q_coeffs']  # input: [c1, s1, c3, s3]
+y_train = train_data['fnl_coeffs']  # output: [c1, s1, c3, s3]
+test_data = np.load('data/duffing_test_data_H3_N64_'+data_id+'.npz')
+X_test = test_data['q_coeffs']
+y_test = test_data['fnl_coeffs']
+val_data = np.load('data/duffing_val_data_H3_N64_'+data_id+'.npz')
+X_val = val_data['q_coeffs']
+y_val = val_data['fnl_coeffs']
 
 # Scale data
 X_train_scaled = np.copy(X_train)
@@ -189,7 +187,7 @@ if MODE == 'train':
     plt.show()
 
 if MODE == 'inference':
-    model = torch.load('models/MLP_Duffing_H3_'+model_load_date+'.pt',
+    model = torch.load('models/MLP_Duffing_H3_'+model_id+'.pt',
                        weights_only=False)
     model.eval()
 
