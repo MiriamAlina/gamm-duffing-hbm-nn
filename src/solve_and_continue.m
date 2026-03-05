@@ -578,6 +578,41 @@ switch Sopt.jac
         fclose(fid);
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 end
+% --- Diagnostics block ---
+persistent diag_fid
+if isempty(diag_fid)
+    diag_fid = fopen('../diag_solver_nn.csv','w');
+    fprintf(diag_fid, 'Om,normR,smin,smax,cond,stepnorm\n');
+end
+
+normR = norm(R);
+
+% robuste smin/smax nur wenn Matrix nicht winzig ist
+try
+    smin = svds(dRdX, 1, 'smallest');
+    smax = svds(dRdX, 1, 'largest');
+    cnd  = smax / max(smin, eps);
+catch
+    smin = NaN; smax = NaN; cnd = NaN;
+end
+
+% "Newton step size" (least-squares)
+% Achtung: kann teuer sein; falls störend, nur selten loggen
+try
+    step = -dRdX \ R;
+    stepnorm = norm(step);
+catch
+    stepnorm = NaN;
+end
+
+Om = X(end);
+fprintf(diag_fid, '%.16e,%.16e,%.16e,%.16e,%.16e,%.16e\n', ...
+    Om, normR, smin, smax, cnd, stepnorm);
+
+% optional: im Terminal nur alle k Schritte ausgeben
+% if mod(Solinfo.iter,10)==0, fprintf('Om %.3f | normR %.2e | cond %.2e\n',Om,normR,cnd); end
+% --- end diagnostics ---
+
 %% Evaluation of the parametrization constraint equation and its derivative
 if Sopt.flag
     switch Sopt.parametrization

@@ -106,3 +106,13 @@ IC = n+repmat(1:n,1,H)+n*kron(0:2:2*(H-1),ones(1,n)); IS = IC+n;
 Q = zeros(n*(H+1),1);
 Q(I0) = X(I0);
 Q(ID) = X(IC)-1i*X(IS);
+
+% --- ALIGN TO AFT CONVENTION (ordering + scaling) ---
+perm_row = [1 2 4 6 3 5 7];
+alpha = 0.5;
+
+R = alpha * R(perm_row);
+
+if nargout > 1
+    dR = alpha * dR(perm_row, :);
+end
