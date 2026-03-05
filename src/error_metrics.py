@@ -55,17 +55,17 @@ def compute_error_metrics(y_true, y_pred, normalize=False, eps=1e-14):
         r2_individual.append(r2_score(y_true[:, i], y_pred[:, i]))
 
     global_error_metrics = {
-        "mae": mae_global,
-        "mse": mse_global,
-        "rmse": rmse_global,
-        "cos": 1-cos_global,
-        "r2": 1-r2_global,
-        "rel_l2": rel_l2_global}
+        "MAE": mae_global,
+        "MSE": mse_global,
+        "RMSE": rmse_global,
+        "Cosine\nDistance": 1-cos_global,
+        r"1-R$^2$": 1-r2_global,
+        "Relative\n"+r"L$^2$ norm": rel_l2_global}
     individual_error_metrics = {
-        "mae": mae_individual,
-        "mse": mse_individual,
-        "rmse": rmse_individual,
-        "r2": r2_individual
+        "MAE": mae_individual,
+        "MSE": mse_individual,
+        "RMSE": rmse_individual,
+        r"1-R$^2$": [1 - r2 for r2 in r2_individual]
     }
 
     return global_error_metrics, individual_error_metrics

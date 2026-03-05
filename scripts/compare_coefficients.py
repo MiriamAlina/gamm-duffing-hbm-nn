@@ -20,25 +20,57 @@ fnl_test_nn = []
 for i in range(len(q_test)):
     fnl_test_nn.append(evaluate_Duffing_nn_H3(nn_id, q_test[i, :]))
 fnl_test_nn = np.array(fnl_test_nn)
-global_metrics_test, individual_metrics_test = \
-    compute_error_metrics(fnl_test_aft, fnl_test_nn)
-plt.bar(global_metrics_test.keys(),
-        [global_metrics_test[k] for k in global_metrics_test.keys()])
-plt.xticks(rotation=45, ha='right')
-plt.yscale('log')
-plt.title(f'Global error metrics on test data for dataset {nn_id}')
-plt.tight_layout()
-plt.show()
 
 global_metrics_test, individual_metrics_test = \
+    compute_error_metrics(fnl_test_aft, fnl_test_nn)
+global_metrics_test_normalized, individual_metrics_test_normalized = \
     compute_error_metrics(fnl_test_aft, fnl_test_nn, normalize=True)
-plt.bar(global_metrics_test.keys(),
-        [global_metrics_test[k] for k in global_metrics_test.keys()])
-plt.xticks(rotation=45, ha='right')
-plt.yscale('log')
-plt.title(f'Global error metrics on test data for dataset {nn_id}')
+
+# Spider plot of error metrics of test samples
+labels = list(global_metrics_test.keys())
+values = [global_metrics_test[k] for k in labels]
+values_norm = [global_metrics_test_normalized[k] for k in labels]
+angles = np.linspace(0, 2*np.pi, len(labels), endpoint=False)
+values = np.r_[values, values[0]]
+values_norm = np.r_[values_norm, values_norm[0]]
+angles = np.r_[angles, angles[0]]
+fig, ax = plt.subplots(figsize=(4, 4), subplot_kw={"projection": "polar"})
+ax.set_yscale("log")
+ax.plot(angles, values, marker="o", label="raw", color='#1D3557')
+ax.fill(angles, values, alpha=0.2, color='#1D3557')
+ax.plot(angles, values_norm, marker="o", label="normalized", color='#E63946')
+ax.fill(angles, values_norm, alpha=0.2, color='#E63946')
+ax.set_xticks(angles[:-1])
+ax.set_xticklabels(labels)
+ax.tick_params(axis='x', pad=12)
+ax.set_ylim(0, max(values + values_norm)*1.1)
+ax.legend(loc='upper center', bbox_to_anchor=(.5, 1.2), ncol=2)
 plt.tight_layout()
+plt.savefig('figures/error_metrics_spider_test.svg', bbox_inches='tight')
 plt.show()
+
+# bar plot of individual error metrics per output of test samples
+outputs = ["A1", "B1", "A3", "B3"]
+colors = ['#1D3557', '#008b9a', '#f19699', '#e63946']
+metrics = individual_metrics_test.keys()
+raw = np.vstack([individual_metrics_test[k] for k in metrics])
+norm = np.vstack([individual_metrics_test_normalized[k] for k in metrics])
+x = np.arange(len(metrics))
+w = 0.18
+fig, ax = plt.subplots(1, 2, figsize=(7, 4), sharey=True)
+for k, (title, data) in enumerate(zip(["raw", "normalized"], [raw, norm])):
+    for j in range(len(outputs)):
+        ax[k].bar(x + (j-1.5)*w, data[:, j], width=w, label=outputs[j],
+                  color=colors[j])
+    ax[k].set_xticks(x)
+    ax[k].set_xticklabels(metrics)
+    ax[k].set_title(title)
+ax[0].set_ylabel("error (0 = better)")
+ax[1].legend(title="output")
+plt.tight_layout()
+plt.savefig('figures/error_metrics_bar_test.svg', bbox_inches='tight')
+plt.show()
+
 
 ###############################################################################
 # Performance on FRC trajectory
@@ -60,11 +92,54 @@ for i in range(np.shape(q_frc_full)[0]):
     fnl_cs_NN = evaluate_Duffing_nn_H3(nn_id, q_rel[i])
     fnl_rel_nn = np.vstack([fnl_rel_nn, fnl_cs_NN])
 
-global_metrics, individual_metrics = \
+global_metrics_frc, individual_metrics_frc = \
     compute_error_metrics(fnl_rel_aft, fnl_rel_nn)
-plt.bar(global_metrics.keys(),
-        [global_metrics[k] for k in global_metrics.keys()])
-plt.xticks(rotation=45, ha='right')
+global_metrics_frc_normalized, individual_metrics_frc_normalized = \
+    compute_error_metrics(fnl_rel_aft, fnl_rel_nn, normalize=True)
+
+# Spider plot of error metrics of FRC trajectory
+labels = list(global_metrics_frc.keys())
+values = [global_metrics_frc[k] for k in labels]
+values_norm = [global_metrics_frc_normalized[k] for k in labels]
+angles = np.linspace(0, 2*np.pi, len(labels), endpoint=False)
+values = np.r_[values, values[0]]
+values_norm = np.r_[values_norm, values_norm[0]]
+angles = np.r_[angles, angles[0]]
+fig, ax = plt.subplots(figsize=(4, 4), subplot_kw={"projection": "polar"})
+ax.set_yscale("log")
+ax.plot(angles, values, marker="o", label="raw", color='#1D3557')
+ax.fill(angles, values, alpha=0.2, color='#1D3557')
+ax.plot(angles, values_norm, marker="o", label="normalized", color='#E63946')
+ax.fill(angles, values_norm, alpha=0.2, color='#E63946')
+ax.set_xticks(angles[:-1])
+ax.set_xticklabels(labels)
+ax.tick_params(axis='x', pad=12)
+ax.set_ylim(0, max(values + values_norm)*1.1)
+ax.legend(loc='upper center', bbox_to_anchor=(.5, 1.2), ncol=2)
+plt.tight_layout()
+plt.savefig('figures/error_metrics_spider_frc.svg', bbox_inches='tight')
+plt.show()
+
+# bar plot of individual error metrics per output of FRC trajectory
+outputs = ["A1", "B1", "A3", "B3"]
+colors = ['#1D3557', '#008b9a', '#f19699', '#e63946']
+metrics = individual_metrics_frc.keys()
+raw = np.vstack([individual_metrics_frc[k] for k in metrics])
+norm = np.vstack([individual_metrics_frc_normalized[k] for k in metrics])
+x = np.arange(len(metrics))
+w = 0.18
+fig, ax = plt.subplots(1, 2, figsize=(7, 4), sharey=True)
+for k, (title, data) in enumerate(zip(["raw", "normalized"], [raw, norm])):
+    for j in range(len(outputs)):
+        ax[k].bar(x + (j-1.5)*w, data[:, j], width=w, label=outputs[j],
+                  color=colors[j])
+    ax[k].set_xticks(x)
+    ax[k].set_xticklabels(metrics)
+    ax[k].set_title(title)
+ax[0].set_ylabel("error (0 = better)")
+ax[1].legend(title="output")
+plt.tight_layout()
+plt.savefig('figures/error_metrics_bar_frc.svg', bbox_inches='tight')
 plt.show()
 
 colors = ['#1D3557', '#008b9a', '#f19699', '#e63946']
