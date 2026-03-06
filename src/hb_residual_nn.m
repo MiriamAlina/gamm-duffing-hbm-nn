@@ -40,6 +40,8 @@
 %========================================================================
 function [R, dR, Q] = hb_residual_nn(X,mu,zeta,kappa,gamma,P,H,N)
 
+persistent pyModule2 pyModule3
+
 mFileFolder = fileparts(mfilename('fullpath'));
 [~, folderName] = fileparts(mFileFolder);  % check whether the current folder is 'scripts'
 if ~strcmp(folderName, 'scripts')
@@ -50,12 +52,17 @@ end
 if count(py.sys.path, pyFolder) == 0
     insert(py.sys.path, int32(0), pyFolder);  % add the current folder to Python sys.path 
 end
-pyModule1 = py.importlib.import_module('aicim_pkg.utils.AFT_Duffing');   
-py.importlib.reload(pyModule1);  % might slow down the code
-pyModule2 = py.importlib.import_module('aicim_pkg.utils.NN_wrapper');
-py.importlib.reload(pyModule2);  % might slow down the code
-pyModule3 = py.importlib.import_module('aicim_pkg.utils.NN_jacobian');
-py.importlib.reload(pyModule3);  % might slow down the code
+
+if isempty(pyModule2) || isempty(pyModule3)
+    pyModule2 = py.importlib.import_module('aicim_pkg.utils.NN_wrapper');
+    pyModule3 = py.importlib.import_module('aicim_pkg.utils.NN_jacobian');
+end
+%pyModule1 = py.importlib.import_module('aicim_pkg.utils.AFT_Duffing');   
+%py.importlib.reload(pyModule1);  % might slow down the code
+%pyModule2 = py.importlib.import_module('aicim_pkg.utils.NN_wrapper');
+%py.importlib.reload(pyModule2);  % might slow down the code
+%pyModule3 = py.importlib.import_module('aicim_pkg.utils.NN_jacobian');
+%py.importlib.reload(pyModule3);  % might slow down the code
 
 % Nonlinear force vector with NN needs input in cosine-sine form
 NN_id = '2026-02-18_13-29-30';  % Identifier of the trained NN model
@@ -115,4 +122,6 @@ R = alpha * R(perm_row);
 
 if nargout > 1
     dR = alpha * dR(perm_row, :);
+end
+
 end

@@ -30,6 +30,7 @@ clearvars;
 close all;
 clc;
 addpath('src');
+pyenv(ExecutionMode="InProcess");  % Use in-process execution mode for Python code, which allows sharing variables and is more efficient for repeated calls. Note: This requires Python 3.8 or later.
 %% Parameters of the Duffing oscillator
 mu = 1;
 zeta = 0.05;
