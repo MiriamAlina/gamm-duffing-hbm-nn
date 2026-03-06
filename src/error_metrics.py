@@ -59,13 +59,13 @@ def compute_error_metrics(y_true, y_pred, normalize=False, eps=1e-14):
         "MSE": mse_global,
         "RMSE": rmse_global,
         "Cosine\nDistance": cos_global,
-        r"1-R$^2$": 1-r2_global,
-        "Relative\n"+r"L$^2$ norm": rel_l2_global}
+        r"$1-$R$^2$": 1-r2_global,
+        "Relative\n"+r"L$^2$ Norm": rel_l2_global}
     individual_error_metrics = {
         "MAE": mae_individual,
         "MSE": mse_individual,
         "RMSE": rmse_individual,
-        r"1-R$^2$": [1 - r2 for r2 in r2_individual]
+        r"$1-$R$^2$": [1 - r2 for r2 in r2_individual]
     }
 
     return global_error_metrics, individual_error_metrics

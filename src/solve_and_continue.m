@@ -546,6 +546,7 @@ end
 function [Rext,dRextdX] = extended_residual(X,Xref,zref,...
     fun_residual,Sopt)
 %% Evaluation of the residual function and its derivative
+persistent diag_fid_aft diag_fid_nn newton_fid_aft newton_fid_nn newton_iter_aft newton_iter_nn
 switch Sopt.jac
     case {'full','on'}
         [R,dRdX] = feval(fun_residual,diag(Sopt.Dscale)*X);
@@ -559,6 +560,54 @@ switch Sopt.jac
         Rp = feval(fun_residual,diag(Sopt.Dscale)*Xtmp);
         dRdlam = (Rp-R)/dlam/Sopt.Dscale(end);
         dRdX = [dRdx dRdlam];
+
+        % --- Diagnostics block ---
+        if isempty(diag_fid_nn)
+            diag_fid_nn = fopen('../diag_solver_nn.csv','w');
+            fprintf(diag_fid_nn, 'Om,normR,smin,smax,cond,stepnorm\n');
+        end
+
+        if isempty(newton_fid_nn)
+            newton_fid_nn = fopen('../newton_log_nn.csv','w');
+            fprintf(newton_fid_nn,'Om,newton_iter,normR,stepnorm\n');
+        end
+
+        if isempty(newton_iter_nn)
+            newton_iter_nn = 0;
+        end
+
+        normR = norm(R);
+
+        % robuste smin/smax nur wenn Matrix nicht winzig ist
+        try
+            smin = svds(dRdX, 1, 'smallest');
+            smax = svds(dRdX, 1, 'largest');
+            cnd  = smax / max(smin, eps);
+        catch
+            smin = NaN; smax = NaN; cnd = NaN;
+        end
+
+        % Newton step
+        try
+            step = -dRdX \ R;
+            stepnorm = norm(step);
+        catch
+            stepnorm = NaN;
+        end
+
+        % Newton iteration counter
+        newton_iter_nn = newton_iter_nn + 1;
+
+        Om = X(end);
+
+        fprintf(newton_fid_nn,'%.16e,%d,%.16e,%.16e\n', ...
+            Om, newton_iter_nn, normR, stepnorm);
+
+        fprintf(diag_fid_nn,'%.16e,%.16e,%.16e,%.16e,%.16e,%.16e\n', ...
+            Om, normR, smin, smax, cnd, stepnorm);
+
+        % --- end diagnostics ---
+
     otherwise
         R = feval(fun_residual,diag(Sopt.Dscale)*X);
         Smyopt = struct('epsrel',Sopt.epsFD,'epsabs',Sopt.epsFD, ...
@@ -577,41 +626,54 @@ switch Sopt.jac
         fprintf(fid, '%.16e\n', row(end));
         fclose(fid);
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        % --- Diagnostics block ---
+
+        if isempty(diag_fid_aft)
+            diag_fid_aft = fopen('../diag_solver.csv','w');
+            fprintf(diag_fid_aft, 'Om,normR,smin,smax,cond,stepnorm\n');
+        end
+
+        if isempty(newton_fid_aft)
+            newton_fid_aft = fopen('../newton_log.csv','w');
+            fprintf(newton_fid_aft,'Om,newton_iter,normR,stepnorm\n');
+        end
+
+        if isempty(newton_iter_aft)
+            newton_iter_aft = 0;
+        end
+
+        normR = norm(R);
+
+        % robuste smin/smax nur wenn Matrix nicht winzig ist
+        try
+            smin = svds(dRdX, 1, 'smallest');
+            smax = svds(dRdX, 1, 'largest');
+            cnd  = smax / max(smin, eps);
+        catch
+            smin = NaN; smax = NaN; cnd = NaN;
+        end
+
+        % Newton step
+        try
+            step = -dRdX \ R;
+            stepnorm = norm(step);
+        catch
+            stepnorm = NaN;
+        end
+
+        % Newton iteration counter
+        newton_iter_aft = newton_iter_aft + 1;
+
+        Om = X(end);
+
+        fprintf(newton_fid_aft,'%.16e,%d,%.16e,%.16e\n', ...
+            Om, newton_iter_aft, normR, stepnorm);
+
+        fprintf(diag_fid_aft,'%.16e,%.16e,%.16e,%.16e,%.16e,%.16e\n', ...
+            Om, normR, smin, smax, cnd, stepnorm);
+
+        % --- end diagnostics ---
 end
-% --- Diagnostics block ---
-persistent diag_fid
-if isempty(diag_fid)
-    diag_fid = fopen('../diag_solver_nn.csv','w');
-    fprintf(diag_fid, 'Om,normR,smin,smax,cond,stepnorm\n');
-end
-
-normR = norm(R);
-
-% robuste smin/smax nur wenn Matrix nicht winzig ist
-try
-    smin = svds(dRdX, 1, 'smallest');
-    smax = svds(dRdX, 1, 'largest');
-    cnd  = smax / max(smin, eps);
-catch
-    smin = NaN; smax = NaN; cnd = NaN;
-end
-
-% "Newton step size" (least-squares)
-% Achtung: kann teuer sein; falls störend, nur selten loggen
-try
-    step = -dRdX \ R;
-    stepnorm = norm(step);
-catch
-    stepnorm = NaN;
-end
-
-Om = X(end);
-fprintf(diag_fid, '%.16e,%.16e,%.16e,%.16e,%.16e,%.16e\n', ...
-    Om, normR, smin, smax, cnd, stepnorm);
-
-% optional: im Terminal nur alle k Schritte ausgeben
-% if mod(Solinfo.iter,10)==0, fprintf('Om %.3f | normR %.2e | cond %.2e\n',Om,normR,cnd); end
-% --- end diagnostics ---
 
 %% Evaluation of the parametrization constraint equation and its derivative
 if Sopt.flag

@@ -187,3 +187,54 @@ fig.legend(handles, labels, loc="lower center", ncol=2,
 fig.tight_layout(rect=[0, 0.08, 1, 1])
 plt.savefig("figures/jacobian_conditioning_vs_omega.svg", bbox_inches="tight")
 plt.show()
+
+
+###############################################################################
+# Linearisation quality test
+###############################################################################
+def linearisation_error(J, R, dx):
+    return np.linalg.norm(R + J @ dx) / max(np.linalg.norm(R), 1e-14)
+
+
+lin_err_fd = []
+lin_err_nn = []
+
+for k in range(len(X)):
+
+    Jfd = Jsub_fd_nnorder[k]
+    Jnn = J_nn[k]
+
+    dx = np.random.randn(7)
+    dx /= np.linalg.norm(dx)
+    dx *= 1e-6
+
+    Rfd = Jfd @ dx
+    Rnn = Jnn @ dx
+
+    lin_err_fd.append(np.linalg.norm(Rfd))
+    lin_err_nn.append(np.linalg.norm(Rnn))
+
+print("Linearisation quality")
+print("FD mean:", np.mean(lin_err_fd))
+print("NN mean:", np.mean(lin_err_nn))
+
+
+###############################################################################
+# Jacobian smoothness
+###############################################################################
+smooth_fd = []
+smooth_nn = []
+
+for k in range(len(J_nn)-1):
+
+    smooth_fd.append(
+        np.linalg.norm(Jsub_fd_nnorder[k+1] - Jsub_fd_nnorder[k])
+    )
+
+    smooth_nn.append(
+        np.linalg.norm(J_nn[k+1] - J_nn[k])
+    )
+
+print("\nJacobian smoothness")
+print("FD mean change:", np.mean(smooth_fd))
+print("NN mean change:", np.mean(smooth_nn))
