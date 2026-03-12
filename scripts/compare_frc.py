@@ -1,6 +1,6 @@
 import numpy as np
 import pandas as pd
-from src.plotting import frc_with_inset_plot
+from src.plotting import frf_plot, frf_with_inset_plot
 
 
 ###############################################################################
@@ -45,10 +45,10 @@ else:
     print('Maximum difference between reference and test results: ' +
           str(max_diff) + RESET)
 
-frc_with_inset_plot([np.concatenate((Om_ana[valid_ana, 0].real,
-                                    Om_ana[valid_ana, 1].real)),
-                     ref.iloc[0].to_numpy(), test.iloc[0].to_numpy()],
-                    [np.concatenate((a_ana[valid_ana], a_ana[valid_ana])),
-                     ref.iloc[1].to_numpy(),
-                     test.iloc[1].to_numpy()],
-                    figure_name='duffing_analytical_aft_nn')
+
+frf_plot(ref.iloc[0].to_numpy(),
+         ref.iloc[1].to_numpy(),
+         figure_name='duffing_aft')
+frf_with_inset_plot([ref.iloc[0].to_numpy(), test.iloc[0].to_numpy()],
+                    [ref.iloc[1].to_numpy(), test.iloc[1].to_numpy()],
+                    figure_name='duffing_aft_nn')

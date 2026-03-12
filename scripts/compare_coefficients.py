@@ -6,8 +6,10 @@ from src.nn_inference import evaluate_Duffing_nn_H3
 from src.error_metrics import compute_error_metrics
 from src.plotting import (error_metrics_spider_plot,
                           individual_error_metrics_bar_plot,
+                          individual_normalized_mse_bar_plot,
                           coefficients_over_iterations_plot,
-                          prediciton_vs_ground_truth_plot)
+                          prediciton_vs_ground_truth_plot,
+                          all_predictions_vs_ground_truths_inset_plot)
 
 
 ###############################################################################
@@ -35,6 +37,14 @@ error_metrics_spider_plot(global_metrics_test, global_metrics_test_normalized,
 individual_error_metrics_bar_plot(individual_metrics_test,
                                   individual_metrics_test_normalized,
                                   figure_name='error_metrics_bar_test')
+
+individual_normalized_mse_bar_plot(individual_metrics_test_normalized,
+                                   figure_name='normalized_mse_bar_test')
+
+all_predictions_vs_ground_truths_inset_plot(
+    [fnl_test_aft],
+    [fnl_test_nn],
+    figure_name='all_predictions_vs_ground_truths_test')
 
 
 ###############################################################################
@@ -69,6 +79,10 @@ individual_error_metrics_bar_plot(individual_metrics_frc,
                                   individual_metrics_frc_normalized,
                                   figure_name='error_metrics_bar_frc')
 
+all_predictions_vs_ground_truths_inset_plot(
+    [fnl_rel_aft],
+    [fnl_rel_nn],
+    figure_name='all_predictions_vs_ground_truths_frc')
 
 # AFT vs. NN over FRC iterations
 coefficients_over_iterations_plot(q_rel, fnl_rel_aft, fnl_rel_nn)

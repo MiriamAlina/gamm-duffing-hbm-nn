@@ -1,12 +1,15 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.colors import LinearSegmentedColormap
+from matplotlib.ticker import FuncFormatter
 from mpl_toolkits.mplot3d import Axes3D  # noqa: F401
 from mpl_toolkits.axes_grid1.inset_locator import inset_axes, mark_inset
 
 
-input_labels = ["a1", "b1", "a3", "b3"]
-output_labels = ["A1", "B1", "A3", "B3"]
+input_labels = [r"$a_1$", r"$b_1$", r"$a_3$", r"$b_3$"]
+output_labels = [r"$A_1$", r"$B_1$", r"$A_3$", r"$B_3$"]
+input_symbols = [r"a_1", r"b_1", r"a_3", r"b_3"]
+output_symbols = [r"A_1", r"B_1", r"A_3", r"B_3"]
 two_colors_set = ['#1D3557', '#e63946']
 three_colors_set = ['#A8DADC', '#1D3557', '#e63946']
 four_colors_set = ['#1D3557', '#008b9a', '#f19699', '#e63946']
@@ -86,6 +89,21 @@ def individual_error_metrics_bar_plot(metrics_dict,
     plt.show()
 
 
+def individual_normalized_mse_bar_plot(normalized_metrics_dict,
+                                       figure_name):
+    norm = normalized_metrics_dict['MSE']
+    x = np.arange(len(norm))
+    w = 0.4
+    fig, ax = plt.subplots(1, 1, figsize=(3, 3))
+    ax.bar(x, norm, label=output_labels, width=w, color=four_colors_set)
+    ax.set_xticks(x)
+    ax.set_xticklabels(output_labels)
+    ax.set_ylabel("normalized mean squared error")
+    plt.tight_layout()
+    plt.savefig(f'figures/{figure_name}.svg', bbox_inches='tight')
+    plt.show()
+
+
 def coefficients_over_iterations_plot(input_coeffs, aft_outputs, nn_outputs):
     """
     Create a line plot showing the evolution of coefficients over iterations.
@@ -146,10 +164,71 @@ def prediciton_vs_ground_truth_plot(ground_truth, prediction):
     plt.show()
 
 
-def frc_with_inset_plot(frequencies, amplitudes, figure_name):
+def all_predictions_vs_ground_truths_inset_plot(ground_truth, prediction,
+                                                figure_name):
+    fig, ax = plt.subplots(1, 1, figsize=(4.4, 3))
+    fig.subplots_adjust(left=0.15, right=0.7, bottom=0.15, top=0.95)
+    for i in range(4):
+        for gt, pred in zip(ground_truth, prediction):
+            ax.plot(gt[:, i], pred[:, i], '.',
+                    label=f'{output_labels[i]}',
+                    color=four_colors_set[i])
+    ax.set_xlabel('AFT Ground Truth')
+    ax.set_ylabel('Neural Network Prediction')
+    ax.legend()
+
+    axins = inset_axes(
+        ax,
+        width=1.2,
+        height=1.2,
+        loc="lower right",
+        bbox_to_anchor=(1.32, 0.15),
+        bbox_transform=ax.transAxes,
+        borderpad=0
+    )
+    for i in range(4):
+        for gt, pred in zip(ground_truth, prediction):
+            axins.plot(gt[:, i], pred[:, i], '.',
+                       color=four_colors_set[i])
+    axins.set_xlim(0.1, 0.22)
+    axins.set_xticks([0.1, 0.2])
+    axins.set_ylim(0.1, 0.22)
+    axins.set_yticks([0.1, 0.2])
+    mark_inset(ax, axins, loc1=2, loc2=3, fc="none", ec="0.5")
+
+    plt.savefig(f'figures/{figure_name}.svg', bbox_inches='tight')
+    plt.show()
+
+
+def frf_plot(frequencies, amplitudes, figure_name):
     """
-    Create a plot of the Frequency Response Curve (FRC) with an inset zooming
-    in on the region around the resonance peak.
+    Create a plot of the Frequency Response Function (FRF) with an inset
+    zooming in on the region around the resonance peak.
+    Parameters
+    ----------
+    frequencies : np.ndarray
+        Array of frequencies to plot.
+    amplitudes : np.ndarray
+        Array of amplitudes corresponding to the frequencies to plot.
+    """
+    fig, ax = plt.subplots(figsize=(5, 2.5))
+    fig.subplots_adjust(left=0.15, right=0.95, bottom=0.2, top=0.9)
+    ax.plot(frequencies, amplitudes, linestyle='-', color=two_colors_set[0],
+            label='AFT')
+    ax.set_xlim(0.4, 1.7)
+    ax.set_ylim(0, 3.0)
+    ax.set_xlabel(r'Excitation Frequency $\Omega$')
+    ax.set_ylabel(r'Amplitude $a$')
+    ax.legend(loc='upper left')
+    ax.grid()
+    plt.savefig(f'./figures/{figure_name}.svg', bbox_inches='tight')
+    plt.show()
+
+
+def frf_with_inset_plot(frequencies, amplitudes, figure_name):
+    """
+    Create a plot of the Frequency Response Function (FRF) with an inset
+    zooming in on the region around the resonance peak.
     Parameters
     ----------
     frequencies : list of np.ndarray
@@ -157,13 +236,14 @@ def frc_with_inset_plot(frequencies, amplitudes, figure_name):
     amplitudes : list of np.ndarray
         List of amplitude arrays corresponding to the frequencies to plot.
     """
-    linestyles = ['-', '-', '']
-    markers = ['', '', '.']
-    labels = ['Analytical (H=1)', 'AFT (H=3)', 'Neural Network (H=3)']
-    fig, ax = plt.subplots(figsize=(5, 4))
+    linestyles = ['-', '']
+    markers = ['', '.']
+    labels = ['AFT', 'Neural Network']
+    fig, ax = plt.subplots(figsize=(5, 2.5))
+    fig.subplots_adjust(left=0.15, right=0.95, bottom=0.2, top=0.9)
     for freq, amp, ls, marker, color, label in zip(frequencies, amplitudes,
                                                    linestyles, markers,
-                                                   three_colors_set, labels):
+                                                   two_colors_set, labels):
         ax.plot(freq, amp, linestyle=ls, marker=marker, color=color,
                 label=label)
     ax.set_xlim(0.4, 1.7)
@@ -181,7 +261,7 @@ def frc_with_inset_plot(frequencies, amplitudes, figure_name):
                        borderpad=0)
     for freq, amp, ls, marker, color, label in zip(frequencies, amplitudes,
                                                    linestyles, markers,
-                                                   three_colors_set, labels):
+                                                   two_colors_set, labels):
         axins.plot(freq, amp, linestyle=ls, marker=marker, color=color)
     axins.set_xlim(1.24, 1.285)
     axins.set_ylim(2.7, 2.95)
@@ -358,12 +438,13 @@ def aft_process_visualization_plot(k, t, q_F, q_T, q3_T, q3_F, figure_name):
     ax[0].bar(k, np.real(q_F), 0.4, color='#1D3557', edgecolor='#1D3557')
     ax[0].set_xlabel('k', fontsize=12)
     ax[0].set_title(r'$\widehat{q}(k)$', fontsize=14, fontweight='bold')
-    ax[1].plot(np.concatenate([t, t+2*np.pi, t+4*np.pi]), np.tile(q_T, 3), 'k')
+    ax[1].plot(np.concatenate([t, t+2*np.pi, t+4*np.pi]), np.tile(q_T, 3), 'k',
+               linewidth=5)
     ax[1].set_xlabel('t', fontsize=12)
     ax[1].set_xlim(0, 6*np.pi)
     ax[1].set_title(r'$q(t)$', fontsize=14, fontweight='bold')
     ax[2].plot(np.concatenate([t, t+2*np.pi, t+4*np.pi]), np.tile(q3_T, 3),
-               'k')
+               'k', linewidth=5)
     ax[2].set_xlabel('t', fontsize=12)
     ax[2].set_xlim(0, 6*np.pi)
     ax[2].set_title(r'$q^3(t)$', fontsize=14, fontweight='bold')
@@ -372,4 +453,120 @@ def aft_process_visualization_plot(k, t, q_F, q_T, q3_T, q3_F, figure_name):
     ax[3].set_title(r'$\widehat{q^3}(k)$', fontsize=14, fontweight='bold')
     plt.tight_layout()
     plt.savefig(f'./figures/{figure_name}.svg', bbox_inches='tight')
+    plt.show()
+
+
+def gradients_over_inputs_plot(inputs, fd_jacobian, nn_jacobian, figure_name):
+
+    def zero_clean_formatter(x, pos):
+        if abs(x) < 1e-12:
+            return "0"
+        return f"{x:g}"
+
+    idx = [1, 2, 5, 6]  # (a1,b1,a3,b3) in NN-order
+
+    fig, axes = plt.subplots(4, 4, figsize=(10, 7), sharex="col")
+    for ii, i in enumerate(idx):  # output index (row)
+        for jj, j in enumerate(idx):  # input index (col)
+            ax = axes[ii, jj]
+            x = inputs[:, j]
+            y_fd = fd_jacobian[:, i, j]
+            y_nn = nn_jacobian[:, i, j]
+            ax.scatter(x, y_fd, s=8, alpha=0.4, color=two_colors_set[0],
+                       label="Finite Differences" if (ii == 0 and jj == 0)
+                       else None)
+            ax.scatter(x, y_nn, s=8, alpha=0.4, color=two_colors_set[1],
+                       label="Neural Network" if (ii == 0 and jj == 0)
+                       else None)
+            if ii == 3:
+                ax.set_xlabel(input_labels[jj], fontsize=12)
+
+            ylabel = (fr"$\frac{{\partial {output_symbols[ii]}}}"
+                      fr"{{\partial {input_symbols[jj]}}}$")
+            ax.set_ylabel(ylabel, rotation=0, fontsize=18, labelpad=15,
+                          va="center")
+
+    for ax in axes.flat:
+        ax.xaxis.set_major_formatter(FuncFormatter(zero_clean_formatter))
+        ax.yaxis.set_major_formatter(FuncFormatter(zero_clean_formatter))
+
+    handles, labels_legend = axes[0, 0].get_legend_handles_labels()
+    fig.legend(handles, labels_legend, loc="lower center", ncol=2,
+               bbox_to_anchor=(0.5, 0.02), fontsize=12, frameon=True)
+    fig.subplots_adjust(wspace=0.8, hspace=0.45)
+    fig.tight_layout(rect=[0, 0.08, 1, 1])
+    plt.savefig(f"figures/{figure_name}.png", dpi=300,
+                bbox_inches="tight")
+    plt.show()
+
+
+def smin_over_samples(fd_smin, nn_smin, figure_name):
+    fig, ax = plt.subplots(figsize=(5, 4))
+
+    ax.semilogy(fd_smin, '.', label='Finite Differences', alpha=0.7,
+                color="#A8DADC")
+    ax.semilogy(nn_smin, '.', label='Neural Network', alpha=0.7,
+                color="#E63946")
+    ax.set_title("Smallest singular value")
+    ax.set_xlabel("Sample index")
+    ax.set_ylabel(r"$\sigma_{\min}(J)$")
+    ax.grid(True)
+
+    handles, labels = ax.get_legend_handles_labels()
+    fig.legend(handles, labels, loc="lower center", ncol=2,
+               bbox_to_anchor=(0.5, -0.02))
+    fig.tight_layout(rect=[0, 0.08, 1, 1])
+    plt.savefig(f"figures/{figure_name}.svg", bbox_inches="tight")
+    plt.show()
+
+
+def cond_over_samples(fd_cond, nn_cond, figure_name):
+    fig, ax = plt.subplots(figsize=(5, 4))
+    ax.semilogy(fd_cond, '.', label='Finite Differences', alpha=0.7,
+                color="#A8DADC")
+    ax.semilogy(nn_cond, '.', label='Neural Network', alpha=0.7,
+                color="#E63946")
+    ax.set_title("Condition number")
+    ax.set_xlabel("Sample index")
+    ax.set_ylabel(r"$\kappa(J)$")
+    ax.grid(True)
+
+    handles, labels = ax.get_legend_handles_labels()
+    fig.legend(handles, labels, loc="lower center", ncol=2,
+               bbox_to_anchor=(0.5, -0.02))
+    fig.tight_layout(rect=[0, 0.08, 1, 1])
+    plt.savefig(f"figures/{figure_name}.svg", bbox_inches="tight")
+    plt.show()
+
+
+def smin_over_omega(fd_smin, nn_smin, Omega, figure_name):
+    fig, ax = plt.subplots(figsize=(5, 2))
+
+    ax.semilogy(Omega, fd_smin, '.', label='Finite Differences', alpha=0.7,
+                color=two_colors_set[0])
+    ax.semilogy(Omega, nn_smin, '.', label='Neural Network', alpha=0.7,
+                color=two_colors_set[1])
+    ax.set_title("Smallest singular value vs Ω")
+    ax.set_xlabel(r"$\Omega$")
+    ax.set_ylabel(r"$\sigma_{\min}(J)$")
+    ax.grid(True)
+    fig.legend()
+    fig.tight_layout(rect=[0, 0.08, 1, 1])
+    plt.savefig(f"figures/{figure_name}.svg", bbox_inches="tight")
+    plt.show()
+
+
+def cond_over_omega(condition_numbers, Omega, min_y, max_y, figure_name):
+    fig, ax = plt.subplots(figsize=(5, 2.2))
+    labels = ['Finite Differences', 'Neural Network']
+    for cond, color, label in zip(condition_numbers, two_colors_set, labels):
+        ax.semilogy(Omega, cond, '.', label=label, alpha=0.7, color=color)
+    ax.set_xlim(0.4, 1.7)
+    ax.set_ylim(min_y-10*min_y, max_y+10*max_y)
+    ax.set_xlabel(r"Excitation frequency $\Omega$")
+    ax.set_ylabel(r"Condition number $\kappa(J)$")
+    ax.grid(True)
+    fig.legend(loc="upper left", bbox_to_anchor=(0.15, 0.92))
+    fig.tight_layout(rect=[0, 0, 1, 1])
+    plt.savefig(f"figures/{figure_name}.svg", bbox_inches="tight")
     plt.show()
