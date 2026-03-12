@@ -2,7 +2,7 @@ import torch
 
 
 def evaluate_Duffing_nn_H3(NN_id, X):
-    model_path = f'models/MLP_Duffing_H3_{NN_id}.pt'
+    model_path = f'models/duffing_mlp_h3_{NN_id}.pt'
     NN_model = torch.load(model_path, weights_only=False)
     NN_model.eval()
 

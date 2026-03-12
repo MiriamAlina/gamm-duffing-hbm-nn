@@ -17,7 +17,7 @@ def NN_jacobian_Duffing_H3(input, mu, zeta, kappa, gamma, P, H, N,
         S[i+1, i] = -Cn
         S[i+1, i+1] = Kn
 
-    NN_model = torch.load('models/MLP_Duffing_H3_'+NN_id+'.pt',
+    NN_model = torch.load('models/duffing_mlp_h3_'+NN_id+'.pt',
                           weights_only=False)
     NN_model.eval()
     relevant_input = np.concatenate((input[1:3], input[5:7]))
