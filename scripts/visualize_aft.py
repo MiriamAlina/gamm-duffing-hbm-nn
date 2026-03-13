@@ -20,4 +20,5 @@ q3_T = q_T**3
 q3_F = np.fft.fft(q3_T)
 
 aft_process_visualization_plot(k, t, q_F, q_T, q3_T, q3_F[:H],
-                               figure_name='aft_process_visualization')
+                               figure_name='aft_process_visualization',
+                               save_figure=False)

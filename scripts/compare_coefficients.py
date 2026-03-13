@@ -8,8 +8,7 @@ from src.plotting import (error_metrics_spider_plot,
                           individual_error_metrics_bar_plot,
                           individual_normalized_mse_bar_plot,
                           coefficients_over_iterations_plot,
-                          prediciton_vs_ground_truth_plot,
-                          all_predictions_vs_ground_truths_inset_plot)
+                          prediction_vs_ground_truth_inset_plot)
 
 
 ###############################################################################
@@ -31,23 +30,23 @@ global_metrics_test, individual_metrics_test = \
 global_metrics_test_normalized, individual_metrics_test_normalized = \
     compute_error_metrics(fnl_test_aft, fnl_test_nn, normalize=True)
 
-error_metrics_spider_plot(global_metrics_test, global_metrics_test_normalized,
-                          figure_name='error_metrics_spider_test',
-                          save_figure=False)
+prediction_vs_ground_truth_inset_plot(
+    [fnl_test_aft],
+    [fnl_test_nn],
+    figure_name='all_predictions_vs_ground_truths_test', save_figure=False)
+
+individual_normalized_mse_bar_plot(individual_metrics_test_normalized,
+                                   figure_name='normalized_mse_bar_test',
+                                   save_figure=False)
 
 individual_error_metrics_bar_plot(individual_metrics_test,
                                   individual_metrics_test_normalized,
                                   figure_name='error_metrics_bar_test',
                                   save_figure=False)
 
-individual_normalized_mse_bar_plot(individual_metrics_test_normalized,
-                                   figure_name='normalized_mse_bar_test',
-                                   save_figure=False)
-
-all_predictions_vs_ground_truths_inset_plot(
-    [fnl_test_aft],
-    [fnl_test_nn],
-    figure_name='all_predictions_vs_ground_truths_test', save_figure=False)
+error_metrics_spider_plot(global_metrics_test, global_metrics_test_normalized,
+                          figure_name='error_metrics_spider_test',
+                          save_figure=False)
 
 
 ###############################################################################
@@ -75,28 +74,18 @@ global_metrics_frc, individual_metrics_frc = \
 global_metrics_frc_normalized, individual_metrics_frc_normalized = \
     compute_error_metrics(fnl_rel_aft, fnl_rel_nn, normalize=True)
 
-error_metrics_spider_plot(global_metrics_frc, global_metrics_frc_normalized,
-                          figure_name='error_metrics_spider_frc',
-                          save_figure=False)
+prediction_vs_ground_truth_inset_plot(
+    [fnl_rel_aft],
+    [fnl_rel_nn],
+    figure_name='all_predictions_vs_ground_truths_frc', save_figure=False)
 
 individual_error_metrics_bar_plot(individual_metrics_frc,
                                   individual_metrics_frc_normalized,
                                   figure_name='error_metrics_bar_frc',
                                   save_figure=False)
 
-all_predictions_vs_ground_truths_inset_plot(
-    [fnl_rel_aft],
-    [fnl_rel_nn],
-    figure_name='all_predictions_vs_ground_truths_frc', save_figure=False)
+error_metrics_spider_plot(global_metrics_frc, global_metrics_frc_normalized,
+                          figure_name='error_metrics_spider_frc',
+                          save_figure=False)
 
-# AFT vs. NN over FRC iterations
 coefficients_over_iterations_plot(q_rel, fnl_rel_aft, fnl_rel_nn)
-
-
-###############################################################################
-# NN prediction vs. AFT ground-truth over test samples and FRC inputs
-###############################################################################
-prediciton_vs_ground_truth_plot([fnl_test_aft, fnl_rel_aft],
-                                [fnl_test_nn, fnl_rel_nn],
-                                figure_name='prediction_vs_ground_truth',
-                                save_figure=False)

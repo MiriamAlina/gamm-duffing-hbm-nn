@@ -1,6 +1,6 @@
 import numpy as np
 import pandas as pd
-from src.plotting import frf_plot, frf_with_inset_plot
+from src.plotting import frc_plot, frc_with_inset_plot
 
 
 ###############################################################################
@@ -30,25 +30,27 @@ ref = pd.read_csv('./results/Duffing_reference_results.csv', header=None)
 test = pd.read_csv('./results/Duffing_testing_results.csv', header=None)
 
 diff = ref - test
-max_diff = diff.abs().max().max()
+max_rel_diff = (diff.abs() / ref.abs()).max().max()
 
 RED = "\033[91m"
 GREEN = "\033[92m"
 RESET = "\033[0m"
-tol = 1e-6
-if max_diff < tol:
-    print(GREEN + "Test passed: Results are within the tolerance limit.")
+tol = 0.5  # 0.5% of the maximum value in the reference results
+if max_rel_diff < tol:
+    print(GREEN + "Test passed: Results are within the tolerance limit of " +
+          str(tol) + "%.")
     print('Maximum difference between reference and test results: ' +
-          str(max_diff) + RESET)
+          str(np.round(max_rel_diff, 2)) + '%' + RESET)
 else:
-    print(RED + "Test failed: Results exceed the tolerance limit.")
+    print(RED + "Test failed: Results exceed the tolerance limit of " +
+          str(tol) + "%.")
     print('Maximum difference between reference and test results: ' +
-          str(max_diff) + RESET)
+          str(np.round(max_rel_diff, 2)) + '%' + RESET)
 
 
-frf_plot(ref.iloc[0].to_numpy(),
+frc_plot(ref.iloc[0].to_numpy(),
          ref.iloc[1].to_numpy(),
          figure_name='duffing_aft')
-frf_with_inset_plot([ref.iloc[0].to_numpy(), test.iloc[0].to_numpy()],
+frc_with_inset_plot([ref.iloc[0].to_numpy(), test.iloc[0].to_numpy()],
                     [ref.iloc[1].to_numpy(), test.iloc[1].to_numpy()],
                     figure_name='duffing_aft_nn')

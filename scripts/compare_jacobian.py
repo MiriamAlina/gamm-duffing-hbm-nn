@@ -1,8 +1,6 @@
 import numpy as np
 from src.nn_jacobian import NN_jacobian_Duffing_H3
 from src.plotting import (gradients_over_inputs_plot,
-                          smin_over_samples,
-                          cond_over_samples,
                           smin_over_omega,
                           cond_over_omega)
 
@@ -65,7 +63,8 @@ for k in range(K):
 # Plot relevant gradients: A1,B1,A3,B3 w.r.t a1,b1,a3,b3
 ###############################################################################
 gradients_over_inputs_plot(X, Jsub_fd_nnorder, J_nn,
-                           figure_name="jacobian_comparison")
+                           figure_name="jacobian_comparison",
+                           save_figure=False)
 
 
 ###############################################################################
@@ -87,22 +86,21 @@ for k in range(K):
 print("FD: min smin =", np.min(smin_fd), " max cond =", np.max(cond_fd))
 print("NN: min smin =", np.min(smin_nn), " max cond =", np.max(cond_nn))
 
-smin_over_samples(smin_fd, smin_nn, figure_name="jacobian_smin_over_samples")
-cond_over_samples(cond_fd, cond_nn, figure_name="jacobian_cond_over_samples")
-
 
 ###############################################################################
 # Conditioning vs Omega
 ###############################################################################
 Omega = X_full[:, -1]
 
-smin_over_omega(smin_fd, smin_nn, Omega, figure_name="jacobian_smin_vs_omega")
+smin_over_omega([smin_fd, smin_nn], Omega, np.min([smin_fd, smin_nn]),
+                np.max([smin_fd, smin_nn]),
+                figure_name="jacobian_smin_vs_omega", save_figure=False)
 cond_over_omega([cond_fd], Omega, np.min([cond_fd, cond_nn]),
                 np.max([cond_fd, cond_nn]),
-                figure_name="jacobian_fd_cond_vs_omega")
+                figure_name="jacobian_fd_cond_vs_omega", save_figure=False)
 cond_over_omega([cond_fd, cond_nn], Omega, np.min([cond_fd, cond_nn]),
                 np.max([cond_fd, cond_nn]),
-                figure_name="jacobian_fd_nn_cond_vs_omega")
+                figure_name="jacobian_fd_nn_cond_vs_omega", save_figure=False)
 
 
 ###############################################################################

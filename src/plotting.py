@@ -47,7 +47,7 @@ def error_metrics_spider_plot(metrics_dict,
     ax.set_xticks(angles[:-1])
     ax.set_xticklabels(labels)
     ax.tick_params(axis='x', pad=12)
-    ax.set_ylim(0, max(values + values_norm)*1.1)
+    ax.set_ylim(min(values)/1.5, max(values)*3)
     ax.legend(loc='upper center', bbox_to_anchor=(.5, 1.2), ncol=2)
     plt.tight_layout()
     if save_figure:
@@ -120,63 +120,23 @@ def coefficients_over_iterations_plot(input_coeffs, aft_outputs, nn_outputs):
     """
     fig, ax = plt.subplots(4, 1, figsize=(5, 8))
     for i in range(4):
-        ax[0].plot(input_coeffs[:, i], label=input_labels[i],
-                   color=four_colors_set[i])
-        ax[1].plot(aft_outputs[:, i], label=output_labels[i],
-                   color=four_colors_set[i])
-        ax[2].plot(nn_outputs[:, i], label=f'{output_labels[i]}_NN',
-                   color=four_colors_set[i])
+        ax[0].plot(input_coeffs[:, i], color=four_colors_set[i])
+        ax[1].plot(aft_outputs[:, i], color=four_colors_set[i])
+        ax[2].plot(nn_outputs[:, i], color=four_colors_set[i])
         ax[3].plot(aft_outputs[:, i] - nn_outputs[:, i],
-                   label=f'{output_labels[i]} error', color=four_colors_set[i])
-    ax[0].legend()
+                   label=output_labels[i], color=four_colors_set[i])
     ax[0].set_title('Input coefficients over iterations')
-    ax[1].legend()
     ax[1].set_title('AFT output coefficients over iterations')
-    ax[2].legend()
     ax[2].set_title('NN output coefficients over iterations')
-    ax[3].legend()
-    ax[3].set_title('Error between AFT and NN outputs over iterations')
+    ax[3].legend(loc="lower center", ncol=4, bbox_to_anchor=(0.5, -0.02))
+    ax[3].set_title('Difference of AFT and NN outputs over iterations')
     plt.tight_layout()
     plt.show()
 
 
-def prediciton_vs_ground_truth_plot(ground_truth, prediction, figure_name,
-                                    save_figure=False):
-    """
-    Create a scatter plot comparing predicted coefficients vs. ground truth.
-    Parameters
-    ----------
-    ground_truth : list of np.ndarray
-        List of ground truth coefficient arrays to compare.
-    prediction : list of np.ndarray
-        List of predicted coefficient arrays to compare.
-    figure_name : str
-        Name of the figure file to save.
-    save_figure : bool, optional
-        Whether to save the figure, by default False.
-    """
-    fig, ax = plt.subplots(1, 4, figsize=(15, 4))
-    markers = ['.', 'x']
-    labels = ['test samples', 'FRC trajectory']
-    for i in range(4):
-        for gt, pred, color, marker, label in zip(ground_truth, prediction,
-                                                  two_colors_set, markers,
-                                                  labels):
-            ax[i].plot(gt[:, i], pred[:, i], marker,
-                       label=f'{output_labels[i]} ({label})', color=color)
-        ax[i].set_xlabel(f'{output_labels[i]} true')
-        ax[i].set_ylabel(f'{output_labels[i]} predicted')
-        ax[i].legend()
-    plt.suptitle('ground truth vs. prediction')
-    plt.tight_layout()
-    if save_figure:
-        plt.savefig(f'figures/{figure_name}.svg', bbox_inches='tight')
-    plt.show()
-
-
-def all_predictions_vs_ground_truths_inset_plot(ground_truth, prediction,
-                                                figure_name,
-                                                save_figure=False):
+def prediction_vs_ground_truth_inset_plot(ground_truth, prediction,
+                                          figure_name,
+                                          save_figure=False):
     fig, ax = plt.subplots(1, 1, figsize=(4.4, 3))
     fig.subplots_adjust(left=0.15, right=0.7, bottom=0.15, top=0.95)
     for i in range(4):
@@ -212,7 +172,7 @@ def all_predictions_vs_ground_truths_inset_plot(ground_truth, prediction,
     plt.show()
 
 
-def frf_plot(frequencies, amplitudes, figure_name, save_figure=False):
+def frc_plot(frequencies, amplitudes, figure_name, save_figure=False):
     """
     Create a plot of the Frequency Response Function (FRF) with an inset
     zooming in on the region around the resonance peak.
@@ -238,7 +198,7 @@ def frf_plot(frequencies, amplitudes, figure_name, save_figure=False):
     plt.show()
 
 
-def frf_with_inset_plot(frequencies, amplitudes, figure_name,
+def frc_with_inset_plot(frequencies, amplitudes, figure_name,
                         save_figure=False):
     """
     Create a plot of the Frequency Response Function (FRF) with an inset
@@ -286,7 +246,8 @@ def frf_with_inset_plot(frequencies, amplitudes, figure_name,
     plt.show()
 
 
-def training_data_distribution_violinplot(inputs, outputs):
+def training_data_distribution_violinplot(inputs, outputs, figure_name,
+                                          save_figure=False):
     """
     Create violin plots to visualize the distribution of input and output
     features.
@@ -312,10 +273,13 @@ def training_data_distribution_violinplot(inputs, outputs):
     ax[1].set_xticklabels([r'$a_1$', r'$b_1$', r'$a_3$', r'$b_3$'])
     ax[1].set_title('Distribution of output features')
     plt.tight_layout()
+    if save_figure:
+        plt.savefig(f'./figures/{figure_name}.svg', bbox_inches='tight')
     plt.show()
 
 
-def training_data_distribution_histogram(inputs, outputs):
+def training_data_distribution_histogram(inputs, outputs, figure_name,
+                                         save_figure=False):
     """
     Create histograms to visualize the distribution of input and output
     features.
@@ -339,12 +303,15 @@ def training_data_distribution_histogram(inputs, outputs):
     ax[1, 1].set_ylabel('Number of samples')
     ax[0, 1].set_title('Distribution of output features')
     plt.tight_layout()
+    if save_figure:
+        plt.savefig(f'./figures/{figure_name}.svg', bbox_inches='tight')
     plt.show()
 
 
 def frc_and_training_inputs_3d_scatter_plot(frc_inputs,
                                             training_inputs,
-                                            figure_name):
+                                            figure_name,
+                                            save_figure=False):
     """
     Create a 3D scatter plot comparing the distribution of training input
     features with the relevant region for the application.
@@ -399,11 +366,13 @@ def frc_and_training_inputs_3d_scatter_plot(frc_inputs,
     ax2.set_zlim(ax1.get_zlim())
 
     plt.tight_layout()
-    plt.savefig(f'./figures/{figure_name}.png', dpi=300, bbox_inches='tight')
+    if save_figure:
+        plt.savefig(f'./figures/{figure_name}.png', dpi=300,
+                    bbox_inches='tight')
     plt.show()
 
 
-def loss_plot(train_loss, val_loss, figure_name):
+def loss_plot(train_loss, val_loss, figure_name, save_figure=False):
     """
     Create a plot of training and validation loss over epochs.
     Parameters
@@ -423,11 +392,13 @@ def loss_plot(train_loss, val_loss, figure_name):
     plt.grid(True)
     plt.legend()
     plt.tight_layout()
-    plt.savefig(f'./figures/{figure_name}.svg', bbox_inches='tight')
+    if save_figure:
+        plt.savefig(f'./figures/{figure_name}.svg', bbox_inches='tight')
     plt.show()
 
 
-def aft_process_visualization_plot(k, t, q_F, q_T, q3_T, q3_F, figure_name):
+def aft_process_visualization_plot(k, t, q_F, q_T, q3_T, q3_F, figure_name,
+                                   save_figure=False):
     """
     Visualize the AFT process including the original and cubed signals in both
     time and frequency domains.
@@ -467,11 +438,13 @@ def aft_process_visualization_plot(k, t, q_F, q_T, q3_T, q3_F, figure_name):
     ax[3].set_xlabel('k', fontsize=12)
     ax[3].set_title(r'$\widehat{q^3}(k)$', fontsize=14, fontweight='bold')
     plt.tight_layout()
-    plt.savefig(f'./figures/{figure_name}.svg', bbox_inches='tight')
+    if save_figure:
+        plt.savefig(f'./figures/{figure_name}.svg', bbox_inches='tight')
     plt.show()
 
 
-def gradients_over_inputs_plot(inputs, fd_jacobian, nn_jacobian, figure_name):
+def gradients_over_inputs_plot(inputs, fd_jacobian, nn_jacobian, figure_name,
+                               save_figure=False):
 
     def zero_clean_formatter(x, pos):
         if abs(x) < 1e-12:
@@ -510,71 +483,34 @@ def gradients_over_inputs_plot(inputs, fd_jacobian, nn_jacobian, figure_name):
                bbox_to_anchor=(0.5, 0.02), fontsize=12, frameon=True)
     fig.subplots_adjust(wspace=0.8, hspace=0.45)
     fig.tight_layout(rect=[0, 0.08, 1, 1])
-    plt.savefig(f"figures/{figure_name}.png", dpi=300,
-                bbox_inches="tight")
+    if save_figure:
+        plt.savefig(f"figures/{figure_name}.png", dpi=300, bbox_inches="tight")
     plt.show()
 
 
-def smin_over_samples(fd_smin, nn_smin, figure_name):
-    fig, ax = plt.subplots(figsize=(5, 4))
-
-    ax.semilogy(fd_smin, '.', label='Finite Differences', alpha=0.7,
-                color="#A8DADC")
-    ax.semilogy(nn_smin, '.', label='Neural Network', alpha=0.7,
-                color="#E63946")
-    ax.set_title("Smallest singular value")
-    ax.set_xlabel("Sample index")
-    ax.set_ylabel(r"$\sigma_{\min}(J)$")
-    ax.grid(True)
-
-    handles, labels = ax.get_legend_handles_labels()
-    fig.legend(handles, labels, loc="lower center", ncol=2,
-               bbox_to_anchor=(0.5, -0.02))
-    fig.tight_layout(rect=[0, 0.08, 1, 1])
-    plt.savefig(f"figures/{figure_name}.svg", bbox_inches="tight")
-    plt.show()
-
-
-def cond_over_samples(fd_cond, nn_cond, figure_name):
-    fig, ax = plt.subplots(figsize=(5, 4))
-    ax.semilogy(fd_cond, '.', label='Finite Differences', alpha=0.7,
-                color="#A8DADC")
-    ax.semilogy(nn_cond, '.', label='Neural Network', alpha=0.7,
-                color="#E63946")
-    ax.set_title("Condition number")
-    ax.set_xlabel("Sample index")
-    ax.set_ylabel(r"$\kappa(J)$")
-    ax.grid(True)
-
-    handles, labels = ax.get_legend_handles_labels()
-    fig.legend(handles, labels, loc="lower center", ncol=2,
-               bbox_to_anchor=(0.5, -0.02))
-    fig.tight_layout(rect=[0, 0.08, 1, 1])
-    plt.savefig(f"figures/{figure_name}.svg", bbox_inches="tight")
-    plt.show()
-
-
-def smin_over_omega(fd_smin, nn_smin, Omega, figure_name):
-    fig, ax = plt.subplots(figsize=(5, 2))
-
-    ax.semilogy(Omega, fd_smin, '.', label='Finite Differences', alpha=0.7,
-                color=two_colors_set[0])
-    ax.semilogy(Omega, nn_smin, '.', label='Neural Network', alpha=0.7,
-                color=two_colors_set[1])
-    ax.set_title("Smallest singular value vs Ω")
-    ax.set_xlabel(r"$\Omega$")
-    ax.set_ylabel(r"$\sigma_{\min}(J)$")
-    ax.grid(True)
-    fig.legend()
-    fig.tight_layout(rect=[0, 0.08, 1, 1])
-    plt.savefig(f"figures/{figure_name}.svg", bbox_inches="tight")
-    plt.show()
-
-
-def cond_over_omega(condition_numbers, Omega, min_y, max_y, figure_name):
+def smin_over_omega(smin_list, Omega, min_y, max_y, figure_name,
+                    save_figure=False):
     fig, ax = plt.subplots(figsize=(5, 2.2))
     labels = ['Finite Differences', 'Neural Network']
-    for cond, color, label in zip(condition_numbers, two_colors_set, labels):
+    for smin, color, label in zip(smin_list, two_colors_set, labels):
+        ax.semilogy(Omega, smin, '.', label=label, alpha=0.7, color=color)
+    ax.set_xlim(0.4, 1.7)
+    ax.set_ylim(min_y-10*min_y, max_y+10*max_y)
+    ax.set_xlabel(r"Excitation frequency $\Omega$")
+    ax.set_ylabel(r"Smallest singular value $\sigma_{\min}(J)$")
+    ax.grid(True)
+    fig.legend(loc="lower left", bbox_to_anchor=(0.15, 0.25))
+    fig.tight_layout(rect=[0, 0, 1, 1])
+    if save_figure:
+        plt.savefig(f"figures/{figure_name}.svg", bbox_inches="tight")
+    plt.show()
+
+
+def cond_over_omega(cond_list, Omega, min_y, max_y, figure_name,
+                    save_figure=False):
+    fig, ax = plt.subplots(figsize=(5, 2.2))
+    labels = ['Finite Differences', 'Neural Network']
+    for cond, color, label in zip(cond_list, two_colors_set, labels):
         ax.semilogy(Omega, cond, '.', label=label, alpha=0.7, color=color)
     ax.set_xlim(0.4, 1.7)
     ax.set_ylim(min_y-10*min_y, max_y+10*max_y)
@@ -583,5 +519,6 @@ def cond_over_omega(condition_numbers, Omega, min_y, max_y, figure_name):
     ax.grid(True)
     fig.legend(loc="upper left", bbox_to_anchor=(0.15, 0.92))
     fig.tight_layout(rect=[0, 0, 1, 1])
-    plt.savefig(f"figures/{figure_name}.svg", bbox_inches="tight")
+    if save_figure:
+        plt.savefig(f"figures/{figure_name}.svg", bbox_inches="tight")
     plt.show()
