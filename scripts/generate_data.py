@@ -7,7 +7,7 @@ from src.fourier_conversion import (convert_cossin_to_comexp,
 from src.trajectory_sampling import sample_along_trajectory
 
 
-SAVE_DATA = 0
+SAVE_DATA = True
 number_samples = 10000
 
 H = 3        # Number of harmonics
@@ -79,4 +79,4 @@ RESET = "\033[0m"
 if SAVE_DATA:
     print(f"{GREEN}Data was saved.{RESET}")
 else:
-    print(f"{RED}Data was NOT saved.{RESET}")
+    print(f"{RED}Data was NOT saved. To save, set SAVE_DATA = True.{RESET}")
