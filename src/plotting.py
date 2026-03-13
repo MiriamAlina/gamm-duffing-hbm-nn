@@ -29,6 +29,8 @@ def error_metrics_spider_plot(metrics_dict,
         Dictionary of error metrics after normalization.
     figure_name : str
         Name of the figure file to save.
+    save_figure : bool, optional
+        Whether to save the figure (default is False).
     """
     labels = list(metrics_dict.keys())
     values = [metrics_dict[k] for k in labels]
@@ -69,6 +71,8 @@ def individual_error_metrics_bar_plot(metrics_dict,
         Dictionary of individual error metrics after normalization.
     figure_name : str
         Name of the figure file to save.
+    save_figure : bool, optional
+        Whether to save the figure (default is False).
     """
     metrics = metrics_dict.keys()
     raw = np.vstack([metrics_dict[k] for k in metrics])
