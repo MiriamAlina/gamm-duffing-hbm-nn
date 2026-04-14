@@ -38,9 +38,9 @@ else:
 
 frc_plot(ref.iloc[0].to_numpy(),
          ref.iloc[1].to_numpy(),
-         figure_name='duffing_aft')
+         figure_name='duffing_aft', save_figure=False)
 frc_with_inset_plot([ref.iloc[0].to_numpy(), test.iloc[0].to_numpy()],
                     [ref.iloc[1].to_numpy(), test.iloc[1].to_numpy()],
-                    figure_name='duffing_aft_nn')
+                    figure_name='duffing_aft_nn', save_figure=False)
 
 plt.show()

@@ -56,7 +56,7 @@ gamma = 0.1
 P = 0.18
 H = 3
 N = 4 * H + 1
-NN_id = '2026-03-25_16-59-05'
+NN_id = '2026-04-14_12-00-35'
 evaluate_coefficients = False
 
 J_nn = np.empty((K, 7, 7))

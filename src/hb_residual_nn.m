@@ -59,7 +59,7 @@ if isempty(pyModule1) || isempty(pyModule2)
 end
 
 % Nonlinear force vector with NN needs input in cosine-sine form
-NN_id = '2026-03-25_16-59-05';  % Identifier of the trained NN model
+NN_id = '2026-04-14_12-00-35';  % Identifier of the trained NN model
 nn_input = [X(2:3).', X(6:7).'];
 nn_output = double(pyModule1.evaluate_Duffing_nn_H3(NN_id, nn_input));
 Fnl_cs = [0, nn_output(1:2), 0, 0, nn_output(3:4)];

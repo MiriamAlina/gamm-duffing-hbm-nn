@@ -9,7 +9,7 @@ from src.plotting import loss_plot
 ###############################################################################
 check_folder_structure()
 
-NN_id = '2026-03-25_16-59-05'
+NN_id = '2026-04-14_12-00-35'
 loaded_loss = joblib.load("models/duffing_losses_h3_"+NN_id+".joblib")
 
 train_data_losses = loaded_loss['train_losses']

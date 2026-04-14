@@ -27,7 +27,7 @@ test_data = np.load('data/duffing_test_data_H3_N64_' + test_data_id + '.npz')
 q_test = test_data['q_coeffs']
 fnl_test_aft = test_data['fnl_coeffs']
 
-nn_id = '2026-03-25_16-59-05'
+nn_id = '2026-04-14_12-00-35'
 fnl_test_nn = []
 for i in range(len(q_test)):
     fnl_test_nn.append(evaluate_Duffing_nn_H3(nn_id, q_test[i, :]))
