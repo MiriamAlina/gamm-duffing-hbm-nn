@@ -235,9 +235,11 @@ def frc_with_inset_plot(frequencies, amplitudes, figure_name,
                                                    linestyles, markers,
                                                    two_colors_set, labels):
         axins.plot(freq, amp, linestyle=ls, marker=marker, color=color)
-    axins.set_xlim(1.24, 1.285)
-    axins.set_ylim(2.7, 2.95)
-    axins.grid()
+    axins.set_xlim(1.265, 1.272)
+    axins.set_ylim(2.8, 2.85)
+    axins.set_xticks([1.265, 1.27])
+    axins.set_yticks([2.8, 2.83])
+    # axins.grid()
     mark_inset(ax, axins, loc1=3, loc2=1, fc="none", ec="0.5")
     if save_figure:
         plt.savefig(f'./figures/{figure_name}.svg', bbox_inches='tight')
