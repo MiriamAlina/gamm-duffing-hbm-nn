@@ -168,7 +168,7 @@ def prediction_vs_ground_truth_inset_plot(ground_truth, prediction,
     mark_inset(ax, axins, loc1=2, loc2=3, fc="none", ec="0.5")
 
     if save_figure:
-        plt.savefig(f'figures/{figure_name}.svg', bbox_inches='tight')
+        plt.savefig(f'figures/{figure_name}.png', dpi=300, bbox_inches='tight')
 
 
 def frc_plot(frequencies, amplitudes, figure_name, save_figure=False):
